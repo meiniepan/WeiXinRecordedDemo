@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.yixia.camera.MediaRecorderBase;
+import com.zhaoshuang.weixinrecorded.ImageUtil.ImgUtil;
 import com.zhaoshuang.weixinrecorded.MyVideoView;
 import com.zhaoshuang.weixinrecorded.RecordedActivity;
 
@@ -21,6 +22,7 @@ public class MainActivity extends Activity {
 
     private MyVideoView vv_play;
     private ImageView iv_photo;
+    private ImageView iv_ss;
     private RelativeLayout rl_show;
 
     @Override
@@ -31,7 +33,11 @@ public class MainActivity extends Activity {
 
         vv_play = findViewById(R.id.vv_play);
         iv_photo = findViewById(R.id.iv_photo);
+        iv_ss = findViewById(R.id.iv_ss);
         rl_show = findViewById(R.id.rl_show);
+//        iv_ss.setImageBitmap(ImgUtil.creatCodeBitmap(new StringBuilder().append(""),this));
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.mipmap.aaa);
+        iv_ss.setImageBitmap(ImgUtil.createAsciiPic(bitmap,this));
     }
 
     public void recordVideo(View view){

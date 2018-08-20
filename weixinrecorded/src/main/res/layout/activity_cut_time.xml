@@ -61,11 +61,15 @@
             android:layout_height="match_parent"
             android:background="#000"
             android:layout_centerInParent="true"/>
+        <ImageView
+            android:id="@+id/iv_gif"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="200dp">
         <LinearLayout
             android:id="@+id/ll_thumbnail"
             android:layout_width="match_parent"
@@ -74,7 +78,7 @@
         <com.zhaoshuang.weixinrecorded.ThumbnailView
             android:id="@+id/thumbnailView"
             android:layout_width="match_parent"
-            android:layout_height="50dp" />
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
 </LinearLayout>

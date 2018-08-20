@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -24,8 +25,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.yixia.camera.MediaRecorderBase;
 import com.yixia.videoeditor.adapter.UtilityAdapter;
+import com.zhaoshuang.weixinrecorded.ImageUtil.ImgUtil;
+
+import java.io.IOException;
+import java.util.AbstractQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zhaoshuang on 2017/9/30.
@@ -48,6 +56,8 @@ public class CutTimeActivity extends BaseActivity{
     private int endTime;
     private int windowWidth;
     private int windowHeight;
+    ImageView gifImg;
+    private int frame;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,6 +82,7 @@ public class CutTimeActivity extends BaseActivity{
         rl_video = (RelativeLayout) findViewById(R.id.rl_video);
         ll_thumbnail = (LinearLayout) findViewById(R.id.ll_thumbnail);
         thumbnailView = (ThumbnailView) findViewById(R.id.thumbnailView);
+        gifImg = findViewById(R.id.iv_gif);
 
         rl_close.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,15 +239,15 @@ public class CutTimeActivity extends BaseActivity{
      */
     private void initThumbs(){
 
-        final int frame = 15;
-        final int frameTime = videoDuration/frame*1000;
+         frame = 30;
+        final int frameTime = 100;
 
         int thumbnailWidth =  ll_thumbnail.getWidth()/frame;
         for (int x=0; x<frame; x++){
             ImageView imageView = new ImageView(this);
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(thumbnailWidth, ViewGroup.LayoutParams.MATCH_PARENT));
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             imageView.setBackgroundColor(Color.parseColor("#666666"));
-            imageView.setScaleType(ImageView.ScaleType.CENTER);
+            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             ll_thumbnail.addView(imageView);
         }
 
@@ -247,10 +258,23 @@ public class CutTimeActivity extends BaseActivity{
                 mediaMetadata.setDataSource(mContext, Uri.parse(path));
                 for (int x=0; x<frame; x++){
                     Bitmap bitmap = mediaMetadata.getFrameAtTime(frameTime*x, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                    Bitmap bitmapAsc = ImgUtil.createAsciiPic(bitmap,CutTimeActivity.this);
+//            Bitmap bitmapAsc = ImgUtil.scale(bitmap,150,200);
+                    accBitmaps.add(bitmapAsc);
                     Message msg = myHandler.obtainMessage();
-                    msg.obj = bitmap;
-                    msg.arg1 = x;
-                    myHandler.sendMessage(msg);
+
+                    if (x == frame -1){
+                        String filename = "hehe";
+                        try {
+                            String url =  ImgUtil.createGif(filename,accBitmaps,200,300,400);
+                            msg.obj = url;
+                            msg.arg1 = x;
+                            myHandler.sendMessage(msg);
+//                String url = Environment.getExternalStorageDirectory().getPath() + "/LiliNote/" + filename + ".gif";
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 mediaMetadata.release();
                 return true;
@@ -261,13 +285,19 @@ public class CutTimeActivity extends BaseActivity{
         }.execute();
     }
 
+    private List<Bitmap> accBitmaps = new ArrayList<>();
     private Handler myHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             ImageView imageView = (ImageView) ll_thumbnail.getChildAt(msg.arg1);
-            Bitmap bitmap = (Bitmap) msg.obj;
-            if(imageView!=null && bitmap!=null) {
-                imageView.setImageBitmap(bitmap);
+            String url = (String) msg.obj;
+            int x = msg.arg1;
+
+            if (x == frame -1){
+
+                String filename = "hehe";
+                //                String url = Environment.getExternalStorageDirectory().getPath() + "/LiliNote/" + filename + ".gif";
+                Glide.with(CutTimeActivity.this).load(url).asGif().into(gifImg);
             }
         }
     };
